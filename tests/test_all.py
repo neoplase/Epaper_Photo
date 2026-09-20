@@ -201,6 +201,16 @@ def test_api_upload_and_display(client):
     assert res_display.status_code == 200
     assert res_display.mimetype == "image/png"
 
+    # Test next photo endpoint
+    res_next = client.post("/api/photo/next")
+    assert res_next.status_code == 200
+    assert res_next.get_json()["success"] is True
+
+    # Test clear screen endpoint
+    res_clear = client.post("/api/clear")
+    assert res_clear.status_code == 200
+    assert res_clear.get_json()["success"] is True
+
     # Cleanup uploaded test file
     res_del = client.delete(f"/api/photo/{data['filename']}")
     assert res_del.status_code == 200

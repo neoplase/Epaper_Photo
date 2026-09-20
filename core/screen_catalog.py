@@ -209,6 +209,32 @@ SCREEN_CATALOG: Dict[str, Dict[str, Any]] = {
     # ==========================================
     # WAVESHARE 7.X" PANELS
     # ==========================================
+    "waveshare_7_3_spectra6": {
+        "id": "waveshare_7_3_spectra6",
+        "brand": "Waveshare",
+        "model_name": "Waveshare 7.3\" Spectra 6 Color",
+        "width": 800,
+        "height": 480,
+        "palette_type": "spectra6",
+        "colors_desc": "Spectra 6 (Black, White, Yellow, Red, Blue, Green)",
+        "driver_type": "waveshare",
+        "driver_module": "epd7in3e",
+        "size_category": "large",
+        "notes": "Waveshare 7.3inch E-Ink Spectra 6 6-color display (uses epd7in3e driver)."
+    },
+    "waveshare_7_3_e": {
+        "id": "waveshare_7_3_e",
+        "brand": "Waveshare",
+        "model_name": "Waveshare 7.3\" (E) Spectra 6 Color",
+        "width": 800,
+        "height": 480,
+        "palette_type": "spectra6",
+        "colors_desc": "Spectra 6 (Black, White, Yellow, Red, Blue, Green)",
+        "driver_type": "waveshare",
+        "driver_module": "epd7in3e",
+        "size_category": "large",
+        "notes": "Waveshare 7.3inch e-Paper (E), E-Ink Spectra 6 6-color display."
+    },
     "waveshare_7_3_f": {
         "id": "waveshare_7_3_f",
         "brand": "Waveshare",
@@ -233,20 +259,7 @@ SCREEN_CATALOG: Dict[str, Dict[str, Any]] = {
         "driver_type": "waveshare",
         "driver_module": "epd7in3g",
         "size_category": "large",
-        "notes": "Waveshare 7.3inch e-Paper (G), 800x480 4-color display."
-    },
-    "waveshare_7_3_e": {
-        "id": "waveshare_7_3_e",
-        "brand": "Waveshare",
-        "model_name": "Waveshare 7.3\" (E) Spectra 6 Color",
-        "width": 800,
-        "height": 480,
-        "palette_type": "spectra6",
-        "colors_desc": "Spectra 6 (Black, White, Yellow, Red, Blue, Green)",
-        "driver_type": "waveshare",
-        "driver_module": "epd7in3e",
-        "size_category": "large",
-        "notes": "Waveshare 7.3inch e-Paper (E), E-Ink Spectra 6 6-color display."
+        "notes": "Waveshare 7.3inch e-Paper (G), 800x480 4-color display (uses epd7in3g driver)."
     },
     "waveshare_7_5_v2": {
         "id": "waveshare_7_5_v2",

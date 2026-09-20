@@ -7,6 +7,8 @@ let allScreens = [];
 let cropper = null;
 let currentSourceCanvas = null; // Un-dithered cropped canvas cache
 let ditherDebounceTimer = null;
+let lastRenderedPhoto = null;
+let lastRenderedTime = null;
 
 // =========================================================================
 // Initialization
@@ -86,11 +88,24 @@ async function loadStatus() {
             if (intervalText) intervalText.textContent = `${data.slideshow_interval_minutes} mins`;
         }
 
+        const photoFilenameEl = document.getElementById("currentPhotoFilename");
+        if (photoFilenameEl) {
+            photoFilenameEl.textContent = data.current_photo || "None";
+        }
+
         const lastUpdatedEl = document.getElementById("lastUpdatedText");
         if (lastUpdatedEl) lastUpdatedEl.textContent = data.current_photo_time || "None";
 
         const nextRefreshEl = document.getElementById("nextRefreshText");
         if (nextRefreshEl) nextRefreshEl.textContent = data.next_refresh_time || "Paused";
+
+        // Auto-refresh displayed frame if photo or timestamp changed
+        if (data.current_photo && (data.current_photo !== lastRenderedPhoto || data.current_photo_time !== lastRenderedTime)) {
+            lastRenderedPhoto = data.current_photo;
+            lastRenderedTime = data.current_photo_time;
+            refreshDisplayImage();
+            loadGallery();
+        }
 
         // Frame status overlay
         const overlay = document.getElementById("frameOverlayStatus");
@@ -116,16 +131,21 @@ function refreshDisplayImage() {
 
 async function triggerNextPhoto() {
     const overlay = document.getElementById("frameOverlayStatus");
-    if (overlay) overlay.textContent = "Triggering next photo...";
+    if (overlay) {
+        overlay.innerHTML = '<span class="status-dot" style="background: #f59e0b; box-shadow: 0 0 8px #f59e0b;"></span> Refreshing Display...';
+    }
     try {
-        await fetch("/api/settings", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({}) // triggers daemon wake
-        });
-        setTimeout(refreshDisplayImage, 1500);
+        const res = await fetch("/api/photo/next", { method: "POST" });
+        const data = await res.json();
+        if (data.success) {
+            lastRenderedPhoto = data.current_photo;
+            lastRenderedTime = data.current_photo_time;
+            refreshDisplayImage();
+            loadStatus();
+            loadGallery();
+        }
     } catch (e) {
-        console.error(e);
+        console.error("Next photo error:", e);
     }
 }
 
@@ -392,8 +412,11 @@ async function pushDitheredToFrame() {
             });
             const data = await res.json();
             if (data.success) {
+                lastRenderedPhoto = data.filename;
                 switchTab("tab-frame");
-                setTimeout(refreshDisplayImage, 1000);
+                refreshDisplayImage();
+                loadStatus();
+                loadGallery();
             } else {
                 alert("Upload failed: " + (data.error || "Unknown error"));
             }
@@ -471,12 +494,19 @@ async function loadGallery() {
 }
 
 async function displayPhoto(filename) {
+    const overlay = document.getElementById("frameOverlayStatus");
+    if (overlay) {
+        overlay.innerHTML = '<span class="status-dot" style="background: #f59e0b; box-shadow: 0 0 8px #f59e0b;"></span> Refreshing Display...';
+    }
     try {
         const res = await fetch(`/api/display/${filename}`, { method: "POST" });
         const data = await res.json();
         if (data.success) {
+            lastRenderedPhoto = filename;
             switchTab("tab-frame");
-            setTimeout(refreshDisplayImage, 1000);
+            refreshDisplayImage();
+            loadStatus();
+            loadGallery();
         }
     } catch (e) {
         console.error("Display photo error:", e);
@@ -497,12 +527,16 @@ async function deletePhoto(filename) {
 async function cleanScreen() {
     if (!confirm("Run deep clean refresh to clear ghosting artifacts on the e-paper panel?")) return;
     const overlay = document.getElementById("frameOverlayStatus");
-    if (overlay) overlay.textContent = "Running Deep Clean Cycle (Clearing Ghosting)...";
+    if (overlay) {
+        overlay.innerHTML = '<span class="status-dot" style="background: #f59e0b; box-shadow: 0 0 8px #f59e0b;"></span> Running Deep Clean Cycle (Clearing Ghosting)...';
+    }
     try {
         const res = await fetch("/api/clear", { method: "POST" });
         const data = await res.json();
-        alert(data.success ? "Clean cycle completed! Screen cleared." : "Clean cycle failed.");
+        lastRenderedPhoto = "(Screen Cleared)";
         refreshDisplayImage();
+        loadStatus();
+        alert(data.success ? "Clean cycle completed! Screen cleared." : "Clean cycle failed.");
     } catch (e) {
         console.error("Clean screen error:", e);
     }

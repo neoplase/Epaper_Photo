@@ -18,11 +18,15 @@ from core.image_engine import process_image
 logger = logging.getLogger("epaper.slideshow")
 
 class SlideshowDaemon:
-    def __init__(self, photo_dir: str = "data/photos", status_file: str = "data/status.json"):
-        self.photo_dir = photo_dir
-        self.status_file = status_file
+    def __init__(self, photo_dir: Optional[str] = None, status_file: Optional[str] = None):
+        base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        data_dir = os.path.join(base_dir, "data")
+        self.data_dir = data_dir
+        self.photo_dir = photo_dir or os.path.join(data_dir, "photos")
+        self.status_file = status_file or os.path.join(data_dir, "status.json")
+        self.current_display_path = os.path.join(data_dir, "current_display.png")
         os.makedirs(self.photo_dir, exist_ok=True)
-        os.makedirs(os.path.dirname(self.status_file), exist_ok=True)
+        os.makedirs(self.data_dir, exist_ok=True)
 
         self._stop_event = threading.Event()
         self._wake_event = threading.Event()
@@ -109,6 +113,13 @@ class SlideshowDaemon:
             if success:
                 self.current_photo = filename
                 self.current_photo_time = time.strftime("%Y-%m-%d %H:%M:%S")
+                # Immediately sync rendered frame to current_display.png so web UI is 100% synced with screen
+                try:
+                    processed.save(self.current_display_path, "PNG")
+                    logger.info(f"[Slideshow] Synced active frame preview to {self.current_display_path}")
+                except Exception as save_err:
+                    logger.warning(f"[Slideshow] Could not save current_display.png: {save_err}")
+
                 logger.info(f"[Slideshow] Displayed '{filename}' successfully.")
             return success
 

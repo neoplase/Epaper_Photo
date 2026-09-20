@@ -13,7 +13,8 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 if BASE_DIR not in sys.path:
     sys.path.insert(0, BASE_DIR)
 
-from flask import Flask, request, jsonify, render_template, send_from_directory, send_file
+import random
+from flask import Flask, request, jsonify, render_template, send_from_directory, send_file, make_response
 from werkzeug.utils import secure_filename
 from PIL import Image
 
@@ -126,14 +127,22 @@ def api_select_screen():
     driver = get_driver(screen_id, force_refresh=True)
     screen_info = get_screen(screen_id)
 
-    # If there's an existing displayed photo, re-render it for new screen dimensions
-    if slideshow_daemon.current_photo:
-        slideshow_daemon.trigger_next(slideshow_daemon.current_photo)
+    # Re-render current photo or first available photo for new screen dimensions
+    target_photo = slideshow_daemon.current_photo
+    if not target_photo or target_photo.startswith("("):
+        photos = slideshow_daemon.get_photos()
+        if photos:
+            target_photo = photos[0]
+
+    if target_photo:
+        slideshow_daemon._display_single_photo(target_photo)
 
     return jsonify({
         "success": True,
         "active_screen": screen_info,
-        "driver": driver.name
+        "driver": driver.name,
+        "current_photo": slideshow_daemon.current_photo,
+        "current_photo_time": slideshow_daemon.current_photo_time
     })
 
 @app.route("/api/photos", methods=["GET"])
@@ -211,6 +220,28 @@ def api_display_photo(filename):
     success = slideshow_daemon._display_single_photo(filename)
     return jsonify({"success": success, "current_photo": filename})
 
+@app.route("/api/photo/next", methods=["POST"])
+def api_next_photo():
+    """Forces immediate transition to next photo in slideshow."""
+    photos = slideshow_daemon.get_photos()
+    if not photos:
+        return jsonify({"error": "No photos available in library"}), 400
+
+    config = get_config()
+    if config.get("slideshow_shuffle", True):
+        available = [p for p in photos if p != slideshow_daemon.current_photo]
+        selected = random.choice(available) if available else photos[0]
+    else:
+        slideshow_daemon._photo_index += 1
+        selected = photos[slideshow_daemon._photo_index % len(photos)]
+
+    success = slideshow_daemon._display_single_photo(selected)
+    return jsonify({
+        "success": success,
+        "current_photo": slideshow_daemon.current_photo,
+        "current_photo_time": slideshow_daemon.current_photo_time
+    })
+
 @app.route("/api/clear", methods=["POST"])
 def api_clear_screen():
     config = get_config()
@@ -219,6 +250,16 @@ def api_clear_screen():
     success = driver.clear()
     if config.get("deep_sleep_enabled", True):
         driver.sleep()
+    if success:
+        try:
+            screen = get_screen(screen_id)
+            blank = Image.new("RGB", (screen["width"], screen["height"]), (255, 255, 255))
+            display_path = os.path.join(DATA_DIR, "current_display.png")
+            blank.save(display_path, "PNG")
+            slideshow_daemon.current_photo = "(Screen Cleared)"
+            slideshow_daemon.current_photo_time = time.strftime("%Y-%m-%d %H:%M:%S")
+        except Exception as e:
+            logger.warning(f"Could not update blank current_display: {e}")
     return jsonify({"success": success})
 
 @app.route("/api/photo/<filename>", methods=["DELETE"])
@@ -245,16 +286,19 @@ def api_settings():
 
 @app.route("/api/current-display", methods=["GET"])
 def api_current_display():
-    """Serves the latest rendered image for the active screen."""
+    """Serves the latest rendered image for the active screen with strict no-cache headers."""
     display_path = os.path.join(DATA_DIR, "current_display.png")
-    if os.path.exists(display_path):
-        return send_file(display_path, mimetype="image/png")
-    # Return placeholder if not yet rendered
-    config = get_config()
-    screen = get_screen(config.get("active_screen", "inky_impression_7_3"))
-    img = Image.new("RGB", (screen["width"], screen["height"]), (240, 240, 240))
-    img.save(display_path)
-    return send_file(display_path, mimetype="image/png")
+    if not os.path.exists(display_path):
+        config = get_config()
+        screen = get_screen(config.get("active_screen", "inky_impression_7_3"))
+        img = Image.new("RGB", (screen["width"], screen["height"]), (240, 240, 240))
+        img.save(display_path, "PNG")
+
+    response = make_response(send_file(display_path, mimetype="image/png"))
+    response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate, max-age=0"
+    response.headers["Pragma"] = "no-cache"
+    response.headers["Expires"] = "0"
+    return response
 
 # File Serving routes
 @app.route("/photos/<path:filename>")
