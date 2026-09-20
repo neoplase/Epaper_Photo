@@ -25,13 +25,13 @@ class WaveshareDisplayDriver(BaseDisplayDriver):
         try:
             return importlib.import_module(module_path)
         except Exception as e:
-            logger.debug(f"[WaveshareDriver] Could not load {module_path}: {e}")
+            logger.warning(f"[WaveshareDriver] Could not load {module_path}: {e}")
 
         # Try direct import by module name (e.g. if installed in site-packages directly)
         try:
             return importlib.import_module(self.driver_module_name)
         except Exception as e:
-            logger.debug(f"[WaveshareDriver] Could not load {self.driver_module_name}: {e}")
+            logger.warning(f"[WaveshareDriver] Could not load {self.driver_module_name}: {e}")
 
         return None
 
@@ -53,7 +53,11 @@ class WaveshareDisplayDriver(BaseDisplayDriver):
                 return False
 
             logger.info(f"[WaveshareDriver] Initializing EPD hardware...")
-            self.epd.init()
+            ret = self.epd.init()
+            if ret == -1:
+                logger.error(f"[WaveshareDriver] EPD hardware init returned error (-1) for {self.name}. Check SPI/wiring.")
+                return False
+
             if hasattr(self.epd, "width") and hasattr(self.epd, "height"):
                 self.width = self.epd.width
                 self.height = self.epd.height

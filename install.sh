@@ -44,10 +44,14 @@ apt-get install -y \
     python3-spidev \
     python3-smbus \
     python3-gpiozero \
+    python3-lgpio \
     git \
     libopenjp2-7 \
     libjpeg-dev \
-    zlib1g-dev
+    zlib1g-dev || apt-get install -y python3-gpiozero python3-spidev python3-flask git
+
+# Add user to hardware groups
+usermod -a -G spi,i2c,gpio "$CURRENT_USER" 2>/dev/null || true
 
 # 3. Install Python requirements
 echo "[*] Installing Python packages..."

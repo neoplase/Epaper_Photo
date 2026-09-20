@@ -301,20 +301,86 @@ class SunriseX3:
         self.GPIO.cleanup([self.RST_PIN, self.DC_PIN, self.CS_PIN, self.BUSY_PIN], self.PWR_PIN)
 
 
-if sys.version_info[0] == 2:
-    process = subprocess.Popen("cat /proc/cpuinfo | grep Raspberry", shell=True, stdout=subprocess.PIPE)
-else:
-    process = subprocess.Popen("cat /proc/cpuinfo | grep Raspberry", shell=True, stdout=subprocess.PIPE, text=True)
-output, _ = process.communicate()
-if sys.version_info[0] == 2:
-    output = output.decode(sys.stdout.encoding)
+is_rpi = False
 
-if "Raspberry" in output:
-    implementation = RaspberryPi()
+# 1. Check device-tree (modern Raspberry Pi OS standard)
+for dt_path in ['/proc/device-tree/model', '/sys/firmware/devicetree/base/model']:
+    if os.path.exists(dt_path):
+        try:
+            with open(dt_path, 'r', errors='ignore') as f:
+                if 'Raspberry' in f.read():
+                    is_rpi = True
+                    break
+        except Exception:
+            pass
+
+# 2. Check cpuinfo
+if not is_rpi and os.path.exists('/proc/cpuinfo'):
+    try:
+        with open('/proc/cpuinfo', 'r', errors='ignore') as f:
+            content = f.read()
+            if 'Raspberry' in content or 'BCM' in content:
+                is_rpi = True
+    except Exception:
+        pass
+
+# 3. Check hardware device nodes
+if not is_rpi and (os.path.exists('/dev/gpiomem') or os.path.exists('/dev/spidev0.0')):
+    is_rpi = True
+
+# 4. Fallback check for linux arm
+if not is_rpi and os.name == 'posix':
+    try:
+        mach = os.uname().machine.lower()
+        if 'arm' in mach or 'aarch64' in mach:
+            is_rpi = True
+    except Exception:
+        pass
+
+if is_rpi:
+    try:
+        implementation = RaspberryPi()
+    except Exception as e:
+        logger.error(f"[epdconfig] Failed to initialize RaspberryPi hardware: {e}")
+        class DummyPlatform:
+            RST_PIN = 17
+            DC_PIN = 25
+            CS_PIN = 8
+            BUSY_PIN = 24
+            PWR_PIN = 18
+            MOSI_PIN = 10
+            SCLK_PIN = 11
+            def __init__(self): pass
+            def digital_write(self, pin, value): pass
+            def digital_read(self, pin): return 0
+            def delay_ms(self, delaytime): time.sleep(delaytime / 1000.0)
+            def spi_writebyte(self, data): pass
+            def spi_writebyte2(self, data): pass
+            def module_init(self, cleanup=False): return -1
+            def module_exit(self, cleanup=False): return 0
+        implementation = DummyPlatform()
 elif os.path.exists('/sys/bus/platform/drivers/gpio-x3'):
     implementation = SunriseX3()
 else:
-    implementation = JetsonNano()
+    # On PC or dev environment, use dummy platform
+    class DummyPlatform:
+        RST_PIN = 17
+        DC_PIN = 25
+        CS_PIN = 8
+        BUSY_PIN = 24
+        PWR_PIN = 18
+        MOSI_PIN = 10
+        SCLK_PIN = 11
+        def __init__(self): pass
+        def digital_write(self, pin, value): pass
+        def digital_read(self, pin): return 0
+        def delay_ms(self, delaytime): time.sleep(delaytime / 1000.0)
+        def spi_writebyte(self, data): pass
+        def spi_writebyte2(self, data): pass
+        def module_init(self, cleanup=False): return -1
+        def module_exit(self, cleanup=False): return 0
+
+    implementation = DummyPlatform()
 
 for func in [x for x in dir(implementation) if not x.startswith('_')]:
     setattr(sys.modules[__name__], func, getattr(implementation, func))
