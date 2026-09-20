@@ -64,7 +64,9 @@
 | **Pimoroni** | Inky pHAT 2.13" | 250 × 122 | 3-Color (Red/Yellow) & Mono | `inky` |
 | **Waveshare** | Waveshare 13.3" (IT8951) | 1600 × 1200 | 16-Level Grayscale | `epd13in3k` |
 | **Waveshare** | Waveshare 10.3" / 9.7" | 1872×1404 / 1200×825 | 16-Level Grayscale | `epd10in3` / `epd9in7` |
-| **Waveshare** | Waveshare 7.3" (F) / (G) Spectra 6 | 800 × 480 | 7-Color (ACeP / Spectra 6) | `epd7in3f` / `epd7in3g` |
+| **Waveshare** | Waveshare 7.3" (E) Spectra 6 | 800 × 480 | Spectra 6 (Black, White, Yellow, Red, Blue, Green) | `epd7in3e` |
+| **Waveshare** | Waveshare 7.3" (F) ACeP | 800 × 480 | 7-Color (Black, White, Green, Blue, Red, Yellow, Orange) | `epd7in3f` |
+| **Waveshare** | Waveshare 7.3" (G) 4-Color | 800 × 480 | 4-Color (Black, White, Yellow, Red) | `epd7in3g` |
 | **Waveshare** | Waveshare 7.5" V2 / HD / (B) 3-Color | 800 × 480 / 880 × 528 | Monochrome / 3-Color Red | `epd7in5_V2` / `epd7in5b_V2` |
 | **Waveshare** | Waveshare 5.83" / 5.65" (F) | 648 × 480 / 600 × 448 | Monochrome / 7-Color | `epd5in83` / `epd5in65f` |
 | **Waveshare** | Waveshare 4.2" / 4.01" (F) | 400 × 300 / 640 × 400 | Monochrome, 3-Color, 7-Color | `epd4in2` / `epd4in01f` |
