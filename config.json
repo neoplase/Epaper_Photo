@@ -1,0 +1,12 @@
+{
+    "active_screen": "inky_impression_7_3",
+    "slideshow_interval_minutes": 60,
+    "slideshow_enabled": true,
+    "slideshow_shuffle": true,
+    "saturation": 1.3,
+    "contrast": 1.15,
+    "brightness": 1.05,
+    "fit_mode": "cover",
+    "orientation": "auto",
+    "deep_sleep_enabled": true
+}

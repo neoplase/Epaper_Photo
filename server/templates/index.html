@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>E-Paper Photo Studio | Universal Frame Controller</title>
+    <meta name="description" content="Universal E-Paper Photo Frame Controller for Raspberry Pi Zero. Upload, crop, dither preview, and drive Pimoroni and Waveshare e-paper displays.">
+    <link rel="stylesheet" href="/static/css/style.css">
+    <!-- Cropper.js for professional image cropping -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.css">
+</head>
+<body>
+
+    <!-- Top Header -->
+    <header class="app-header">
+        <div class="header-container">
+            <div class="brand-badge">
+                <div class="brand-icon">
+                    <svg viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M4 4h16a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2zm0 2v12h16V6H4zm3 9l3-4 2 2.5 3-3.8 4 5.3H6.8l.2-.2z"/>
+                    </svg>
+                </div>
+                <div>
+                    <div class="brand-title">E-Paper Studio</div>
+                    <div class="brand-subtitle">Raspberry Pi Frame Hub</div>
+                </div>
+            </div>
+
+            <div class="header-meta">
+                <div class="screen-badge-pill" id="headerScreenPill" onclick="switchTab('tab-screens')">
+                    <span class="status-dot"></span>
+                    <span id="headerScreenName">Inky Impression 7.3"</span>
+                    <span id="headerScreenRes" style="opacity: 0.7; font-family: monospace;">(800x480)</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Tab Navigation -->
+    <nav class="nav-tabs-wrapper">
+        <div class="nav-tabs">
+            <button class="tab-btn active" onclick="switchTab('tab-frame')" id="btn-tab-frame">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+                Now Showing
+            </button>
+            <button class="tab-btn" onclick="switchTab('tab-upload')" id="btn-tab-upload">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                Upload & Crop
+            </button>
+            <button class="tab-btn" onclick="switchTab('tab-dither')" id="btn-tab-dither">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M14.31 8l5.74 9.94M9.69 8h11.48M7.38 12l5.74-9.94M9.69 16L3.95 6.06M14.31 16H2.83m13.79-4l-5.74 9.94"/></svg>
+                Dither Studio
+            </button>
+            <button class="tab-btn" onclick="switchTab('tab-gallery')" id="btn-tab-gallery">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                Gallery & Playlist
+            </button>
+            <button class="tab-btn" onclick="switchTab('tab-screens')" id="btn-tab-screens">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><line x1="9" y1="1" x2="9" y2="4"/><line x1="15" y1="1" x2="15" y2="4"/><line x1="9" y1="20" x2="9" y2="23"/><line x1="15" y1="20" x2="15" y2="23"/><line x1="20" y1="9" x2="23" y2="9"/><line x1="20" y1="14" x2="23" y2="14"/><line x1="1" y1="9" x2="4" y2="9"/><line x1="1" y1="14" x2="4" y2="14"/></svg>
+                Screen Profiles
+            </button>
+        </div>
+    </nav>
+
+    <!-- Main Content Area -->
+    <main class="app-main">
+
+        <!-- TAB 1: NOW SHOWING -->
+        <section class="tab-content active" id="tab-frame">
+            <div class="grid-2col">
+                <!-- Left: Virtual Frame Mockup -->
+                <div class="studio-card">
+                    <div class="card-header">
+                        <div class="card-title-group">
+                            <h2 class="card-title">Active Display</h2>
+                        </div>
+                        <button class="btn btn-secondary" onclick="refreshDisplayImage()" style="padding: 0.4rem 0.8rem; font-size: 0.82rem;">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+                            Reload Frame
+                        </button>
+                    </div>
+
+                    <div class="frame-mockup-wrapper">
+                        <img src="/api/current-display" id="activeFrameImg" class="frame-mockup-screen" alt="Current E-Paper Display">
+                        <div class="frame-overlay-status">
+                            <span class="status-dot"></span>
+                            <span id="frameOverlayStatus">Screen Asleep (0W Power)</span>
+                        </div>
+                    </div>
+
+                    <div style="display: flex; gap: 0.75rem;">
+                        <button class="btn btn-primary" onclick="triggerNextPhoto()" style="flex: 1;">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 4 15 12 5 20 5 4"/><line x1="19" y1="5" x2="19" y2="19"/></svg>
+                            Next Photo
+                        </button>
+                        <button class="btn btn-secondary" onclick="switchTab('tab-upload')" style="flex: 1;">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                            Add New Photo
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Right: Schedule & Hardware Info -->
+                <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+                    <!-- Diagnostics Card -->
+                    <div class="studio-card">
+                        <div class="card-header">
+                            <h2 class="card-title">Pi System Diagnostics</h2>
+                        </div>
+                        <div class="stats-grid">
+                            <div class="stat-box">
+                                <div class="stat-value" id="statCpuTemp">--°C</div>
+                                <div class="stat-label">Pi CPU Temp</div>
+                            </div>
+                            <div class="stat-box">
+                                <div class="stat-value" id="statDiskFree">-- MB</div>
+                                <div class="stat-label">Storage Free</div>
+                            </div>
+                            <div class="stat-box">
+                                <div class="stat-value" id="statPhotoCount">0</div>
+                                <div class="stat-label">Photos in Hub</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Rotation Schedule Card -->
+                    <div class="studio-card">
+                        <div class="card-header">
+                            <h2 class="card-title">Slideshow Scheduler</h2>
+                        </div>
+                        <div style="display: flex; flex-direction: column; gap: 1rem;">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <div>
+                                    <div style="font-weight: 600;">Auto-Rotation</div>
+                                    <div style="font-size: 0.8rem; color: var(--text-muted);">Cycle photos automatically</div>
+                                </div>
+                                <input type="checkbox" id="slideshowEnabledCheck" onchange="toggleSlideshowEnabled(this.checked)" style="width: 20px; height: 20px; cursor: pointer; accent-color: var(--accent-amber);">
+                            </div>
+
+                            <div class="slider-group">
+                                <div class="slider-label-row">
+                                    <span>Refresh Interval</span>
+                                    <span class="slider-value" id="intervalValText">60 mins</span>
+                                </div>
+                                <input type="range" id="intervalRange" min="5" max="720" step="5" value="60" oninput="document.getElementById('intervalValText').textContent = this.value + ' mins'" onchange="updateIntervalSetting(this.value)">
+                            </div>
+
+                            <div style="font-size: 0.85rem; color: var(--text-muted); background: var(--bg-surface-elevated); padding: 0.75rem; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle);">
+                                <div><strong>Last Updated:</strong> <span id="lastUpdatedText">--</span></div>
+                                <div style="margin-top: 0.25rem;"><strong>Next Refresh:</strong> <span id="nextRefreshText">--</span></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 2: UPLOAD & CROP -->
+        <section class="tab-content" id="tab-upload">
+            <div class="grid-2col">
+                <!-- Dropzone / Selector -->
+                <div class="studio-card">
+                    <div class="card-header">
+                        <h2 class="card-title">1. Select Photo</h2>
+                    </div>
+                    <div class="upload-dropzone" id="dropzone" onclick="document.getElementById('fileInput').click()">
+                        <div class="upload-icon-circle">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                        </div>
+                        <div>
+                            <div style="font-weight: 600; font-size: 1.1rem; color: #fff;">Drop photo here or click to browse</div>
+                            <div style="color: var(--text-muted); font-size: 0.85rem; margin-top: 0.35rem;">Supports JPG, PNG, WEBP, BMP up to 32MB</div>
+                        </div>
+                        <input type="file" id="fileInput" accept="image/*" style="display: none;" onchange="handleFileSelect(event)">
+                    </div>
+                </div>
+
+                <!-- Interactive Framing Cropper -->
+                <div class="studio-card">
+                    <div class="card-header">
+                        <div>
+                            <h2 class="card-title">2. Frame for Screen</h2>
+                            <div class="card-description" id="cropAspectDesc">Aspect ratio locked to 800x480</div>
+                        </div>
+                        <button class="btn btn-secondary" onclick="rotateCropper()" style="padding: 0.4rem 0.8rem; font-size: 0.82rem;">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+                            Rotate 90°
+                        </button>
+                    </div>
+
+                    <div class="cropper-container">
+                        <img id="cropperImage" style="max-width: 100%; display: none;" alt="Crop Preview">
+                        <div id="cropperPlaceholder" style="color: var(--text-dim); text-align: center; padding: 2rem;">
+                            Upload an image on the left to start framing
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 1.25rem; display: flex; gap: 0.75rem;">
+                        <button class="btn btn-primary" id="btnGoToDither" onclick="proceedToDitherStudio()" disabled style="flex: 1;">
+                            Proceed to Dither Studio &rarr;
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 3: DITHER STUDIO (LIVE CLIENT-SIDE PREVIEW) -->
+        <section class="tab-content" id="tab-dither">
+            <div class="grid-2col">
+                <!-- Preview Canvas -->
+                <div class="studio-card">
+                    <div class="card-header">
+                        <div>
+                            <h2 class="card-title">Live E-Paper Pigment Simulation</h2>
+                            <div class="card-description" id="ditherModeTitle">Floyd-Steinberg Error Diffusion Preview</div>
+                        </div>
+                    </div>
+
+                    <div class="cropper-container">
+                        <canvas id="ditherCanvas" class="canvas-preview"></canvas>
+                    </div>
+
+                    <div style="margin-top: 1.25rem; display: flex; gap: 0.75rem;">
+                        <button class="btn btn-primary" id="btnPushToFrame" onclick="pushDitheredToFrame()" style="flex: 1;">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"/><path d="M12 5l7 7-7 7"/></svg>
+                            Send to E-Paper Frame Now
+                        </button>
+                        <button class="btn btn-secondary" onclick="saveToGalleryOnly()" style="flex: 1;">
+                            Add to Library Only
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Adjustment Controls -->
+                <div class="studio-card">
+                    <div class="card-header">
+                        <h2 class="card-title">Color & Contrast Tuning</h2>
+                    </div>
+
+                    <div class="controls-toolbar">
+                        <!-- Saturation Boost -->
+                        <div class="slider-group">
+                            <div class="slider-label-row">
+                                <span>Saturation Boost (Crucial for E-Paper)</span>
+                                <span class="slider-value" id="valSaturation">1.30x</span>
+                            </div>
+                            <input type="range" id="sliderSaturation" min="0.5" max="2.5" step="0.05" value="1.30" oninput="onAdjustmentSliderChange()">
+                        </div>
+
+                        <!-- Contrast Boost -->
+                        <div class="slider-group">
+                            <div class="slider-label-row">
+                                <span>Contrast Enhancement</span>
+                                <span class="slider-value" id="valContrast">1.15x</span>
+                            </div>
+                            <input type="range" id="sliderContrast" min="0.7" max="1.8" step="0.05" value="1.15" oninput="onAdjustmentSliderChange()">
+                        </div>
+
+                        <!-- Brightness Boost -->
+                        <div class="slider-group">
+                            <div class="slider-label-row">
+                                <span>Brightness Level</span>
+                                <span class="slider-value" id="valBrightness">1.05x</span>
+                            </div>
+                            <input type="range" id="sliderBrightness" min="0.5" max="1.6" step="0.05" value="1.05" oninput="onAdjustmentSliderChange()">
+                        </div>
+
+                        <!-- Target Palette Override -->
+                        <div class="slider-group" style="margin-top: 0.5rem;">
+                            <label style="font-size: 0.85rem; color: var(--text-muted); font-weight: 500;">Simulated Palette Mode</label>
+                            <select id="selectPaletteOverride" class="filter-select" onchange="onAdjustmentSliderChange()" style="margin-top: 0.35rem;">
+                                <option value="auto">Auto (Match Selected Screen)</option>
+                                <option value="7color">7-Color (Black, White, Green, Blue, Red, Yellow, Orange)</option>
+                                <option value="bwr">3-Color Red (Black, White, Red)</option>
+                                <option value="bwy">3-Color Yellow (Black, White, Yellow)</option>
+                                <option value="grayscale16">16-Level Grayscale (13.3" / 10.3")</option>
+                                <option value="mono">1-Bit Monochrome (Black & White)</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 4: GALLERY & PLAYLIST -->
+        <section class="tab-content" id="tab-gallery">
+            <div class="studio-card">
+                <div class="card-header">
+                    <div>
+                        <h2 class="card-title">Photo Library</h2>
+                        <div class="card-description">All uploaded photos available for rotation</div>
+                    </div>
+                    <button class="btn btn-primary" onclick="switchTab('tab-upload')" style="font-size: 0.85rem; padding: 0.5rem 1rem;">
+                        + Upload Photo
+                    </button>
+                </div>
+
+                <div class="gallery-grid" id="galleryContainer">
+                    <!-- Dynamic photo cards loaded here -->
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 5: SCREEN PROFILES & HARDWARE -->
+        <section class="tab-content" id="tab-screens">
+            <div class="studio-card">
+                <div class="card-header">
+                    <div>
+                        <h2 class="card-title">Select Active E-Paper Screen</h2>
+                        <div class="card-description">Choose your connected display model. All Pimoroni and Waveshare panels supported.</div>
+                    </div>
+                </div>
+
+                <!-- Search & Filters -->
+                <div class="screen-filter-bar">
+                    <input type="text" id="screenSearchInput" class="search-input" placeholder="Search by name, size (e.g. 7.3, 13.3), or driver..." oninput="renderScreenCatalog()">
+                    
+                    <select id="screenBrandFilter" class="filter-select" onchange="renderScreenCatalog()">
+                        <option value="all">All Brands</option>
+                        <option value="Pimoroni">Pimoroni</option>
+                        <option value="Waveshare">Waveshare</option>
+                        <option value="Virtual">Virtual / Dev</option>
+                    </select>
+
+                    <select id="screenPaletteFilter" class="filter-select" onchange="renderScreenCatalog()">
+                        <option value="all">All Color Types</option>
+                        <option value="7color">7-Color (ACeP / Spectra 6)</option>
+                        <option value="bwr">3-Color Red</option>
+                        <option value="bwy">3-Color Yellow</option>
+                        <option value="grayscale16">16-Level Grayscale</option>
+                        <option value="mono">Monochrome</option>
+                    </select>
+                </div>
+
+                <!-- Screen Grid -->
+                <div class="screen-cards-grid" id="screenCardsGrid">
+                    <!-- Dynamic screen cards -->
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Cropper.js Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js"></script>
+    <!-- Dithering Simulator -->
+    <script src="/static/js/dither_simulator.js"></script>
+    <!-- Main App Controller -->
+    <script src="/static/js/app.js"></script>
+</body>
+</html>

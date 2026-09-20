@@ -1,0 +1,11 @@
+# Universal E-Paper Photo Frame System Dependencies
+Flask>=3.0.0
+Pillow>=10.0.0
+numpy>=1.20.0
+werkzeug>=3.0.0
+
+# Optional hardware libraries (installed automatically on Raspberry Pi via install.sh):
+# inky>=1.5.0
+# spidev>=3.5
+# gpiozero>=1.6.0
+# smbus2>=0.4.0
