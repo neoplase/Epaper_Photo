@@ -4,7 +4,12 @@ Verifies catalog integrity, image processing pipeline, driver switching, and RES
 """
 
 import os
+import sys
 import io
+
+# Ensure workspace root is in python path
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 import pytest
 from PIL import Image
 from core.screen_catalog import SCREEN_CATALOG, get_screen, list_screens
