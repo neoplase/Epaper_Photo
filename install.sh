@@ -32,7 +32,7 @@ else
     echo "[!] raspi-config not found. Please ensure SPI and I2C are enabled in /boot/config.txt"
 fi
 
-# 2. Update and install system dependencies via APT
+# 2. Update and install system dependencies via APT (compatible with Bullseye & Bookworm)
 echo "[*] Updating apt package cache and installing system libraries..."
 apt-get update -y
 apt-get install -y \
@@ -40,18 +40,19 @@ apt-get install -y \
     python3-pip \
     python3-pil \
     python3-numpy \
+    python3-flask \
     python3-spidev \
     python3-smbus \
     python3-gpiozero \
     git \
     libopenjp2-7 \
-    libtiff5 \
-    libatlas-base-dev
+    libjpeg-dev \
+    zlib1g-dev
 
 # 3. Install Python requirements
 echo "[*] Installing Python packages..."
 sudo -u "$CURRENT_USER" pip3 install -r requirements.txt --break-system-packages 2>/dev/null || \
-sudo -u "$CURRENT_USER" pip3 install -r requirements.txt
+sudo -u "$CURRENT_USER" pip3 install -r requirements.txt 2>/dev/null || true
 
 # 4. Install Pimoroni Inky library
 echo "[*] Installing Pimoroni Inky library..."
