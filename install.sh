@@ -59,19 +59,11 @@ echo "[*] Installing Pimoroni Inky library..."
 sudo -u "$CURRENT_USER" pip3 install inky --break-system-packages 2>/dev/null || \
 sudo -u "$CURRENT_USER" pip3 install inky || true
 
-# 5. Install Waveshare E-Paper library
-echo "[*] Setting up Waveshare E-Paper drivers..."
-WAVESHARE_TMP="/tmp/waveshare_epd_build"
-if [ ! -d "$INSTALL_DIR/waveshare_epd" ]; then
-    echo "[*] Fetching official Waveshare Python drivers..."
-    rm -rf "$WAVESHARE_TMP"
-    git clone --depth 1 https://github.com/waveshareteam/e-Paper.git "$WAVESHARE_TMP" || true
-    if [ -d "$WAVESHARE_TMP/RaspberryPi_JetsonNano/python/lib/waveshare_epd" ]; then
-        cp -r "$WAVESHARE_TMP/RaspberryPi_JetsonNano/python/lib/waveshare_epd" "$INSTALL_DIR/"
-        chown -R "$CURRENT_USER:$CURRENT_USER" "$INSTALL_DIR/waveshare_epd"
-        echo "[+] Waveshare E-Paper drivers installed."
-    fi
-    rm -rf "$WAVESHARE_TMP"
+# 5. Waveshare E-Paper library
+echo "[*] Waveshare E-Paper drivers bundled and ready."
+if [ -d "$INSTALL_DIR/waveshare_epd" ]; then
+    chown -R "$CURRENT_USER:$CURRENT_USER" "$INSTALL_DIR/waveshare_epd"
+    echo "[+] Bundled Waveshare drivers configured."
 fi
 
 # 6. Ensure data directories exist with proper ownership

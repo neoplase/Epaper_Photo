@@ -24,14 +24,14 @@ class WaveshareDisplayDriver(BaseDisplayDriver):
         module_path = f"waveshare_epd.{self.driver_module_name}"
         try:
             return importlib.import_module(module_path)
-        except ImportError:
-            pass
+        except Exception as e:
+            logger.debug(f"[WaveshareDriver] Could not load {module_path}: {e}")
 
         # Try direct import by module name (e.g. if installed in site-packages directly)
         try:
             return importlib.import_module(self.driver_module_name)
-        except ImportError:
-            pass
+        except Exception as e:
+            logger.debug(f"[WaveshareDriver] Could not load {self.driver_module_name}: {e}")
 
         return None
 
