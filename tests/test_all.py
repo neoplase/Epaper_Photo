@@ -20,7 +20,7 @@ from server.app import app
 def test_screen_catalog_structure():
     assert len(SCREEN_CATALOG) >= 20, f"Expected at least 20 screens, got {len(SCREEN_CATALOG)}"
 
-    valid_palettes = {"7color", "bwr", "bwy", "grayscale16", "mono"}
+    valid_palettes = {"7color", "bwr", "bwy", "grayscale16", "mono", "4color", "spectra6"}
     valid_drivers = {"inky", "waveshare", "mock"}
 
     for screen_id, s in SCREEN_CATALOG.items():
@@ -69,6 +69,16 @@ def test_dithering_palettes():
     d7 = dither_for_palette(src, "7color")
     assert d7.size == (100, 100)
     assert d7.mode == "RGB"
+
+    # Test 4-color (Waveshare 7.3 G)
+    d4 = dither_for_palette(src, "4color")
+    assert d4.size == (100, 100)
+    assert d4.mode == "RGB"
+
+    # Test Spectra 6 (Waveshare 7.3 E)
+    ds6 = dither_for_palette(src, "spectra6")
+    assert ds6.size == (100, 100)
+    assert ds6.mode == "RGB"
 
     # Test BWR
     dbwr = dither_for_palette(src, "bwr")

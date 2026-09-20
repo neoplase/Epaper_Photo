@@ -225,15 +225,28 @@ SCREEN_CATALOG: Dict[str, Dict[str, Any]] = {
     "waveshare_7_3_g": {
         "id": "waveshare_7_3_g",
         "brand": "Waveshare",
-        "model_name": "Waveshare 7.3\" (G) Spectra 6 Color",
+        "model_name": "Waveshare 7.3\" (G) 4-Color (Red/Yellow/Black/White)",
         "width": 800,
         "height": 480,
-        "palette_type": "7color",
-        "colors_desc": "Spectra 6 Color (Black, White, Yellow, Red, Blue, Green)",
+        "palette_type": "4color",
+        "colors_desc": "4-Color (Black, White, Yellow, Red)",
         "driver_type": "waveshare",
         "driver_module": "epd7in3g",
         "size_category": "large",
-        "notes": "Waveshare 7.3inch e-Paper (G), E-Ink Spectra 6 vibrant 6/7-color display."
+        "notes": "Waveshare 7.3inch e-Paper (G), 800x480 4-color display."
+    },
+    "waveshare_7_3_e": {
+        "id": "waveshare_7_3_e",
+        "brand": "Waveshare",
+        "model_name": "Waveshare 7.3\" (E) Spectra 6 Color",
+        "width": 800,
+        "height": 480,
+        "palette_type": "spectra6",
+        "colors_desc": "Spectra 6 (Black, White, Yellow, Red, Blue, Green)",
+        "driver_type": "waveshare",
+        "driver_module": "epd7in3e",
+        "size_category": "large",
+        "notes": "Waveshare 7.3inch e-Paper (E), E-Ink Spectra 6 6-color display."
     },
     "waveshare_7_5_v2": {
         "id": "waveshare_7_5_v2",

@@ -32,6 +32,24 @@ PALETTE_BWY = [
     255, 220, 0     # Yellow
 ]
 
+# 4-Color (Black, White, Yellow, Red) for Waveshare 7.3 (G)
+PALETTE_4COLOR = [
+    0, 0, 0,        # Black
+    255, 255, 255,  # White
+    255, 255, 0,    # Yellow
+    255, 0, 0       # Red
+]
+
+# Spectra 6 (Black, White, Yellow, Red, Blue, Green) for Waveshare 7.3 (E)
+PALETTE_SPECTRA6 = [
+    0, 0, 0,        # Black
+    255, 255, 255,  # White
+    255, 255, 0,    # Yellow
+    255, 0, 0,      # Red
+    0, 0, 255,      # Blue
+    0, 255, 0       # Green
+]
+
 def _create_palette_image(rgb_list: list) -> Image.Image:
     """Creates an indexed 8-bit palette image for Pillow quantization."""
     pal_img = Image.new("P", (1, 1))
@@ -43,6 +61,8 @@ def _create_palette_image(rgb_list: list) -> Image.Image:
 _PAL_IMG_7COLOR = _create_palette_image(PALETTE_7COLOR)
 _PAL_IMG_BWR = _create_palette_image(PALETTE_BWR)
 _PAL_IMG_BWY = _create_palette_image(PALETTE_BWY)
+_PAL_IMG_4COLOR = _create_palette_image(PALETTE_4COLOR)
+_PAL_IMG_SPECTRA6 = _create_palette_image(PALETTE_SPECTRA6)
 
 # 16-level grayscale palette
 _GRAY16_LIST = []
@@ -153,6 +173,16 @@ def dither_for_palette(image: Image.Image, palette_type: str) -> Image.Image:
         # 16-level grayscale
         gray = image.convert("L")
         quantized = gray.quantize(palette=_PAL_IMG_GRAY16, dither=dither_flag)
+        return quantized.convert("RGB")
+
+    elif palette_type in ("4color", "4color_rybw"):
+        # 4-color (Black, White, Yellow, Red) for Waveshare 7.3 (G)
+        quantized = image.quantize(palette=_PAL_IMG_4COLOR, dither=dither_flag)
+        return quantized.convert("RGB")
+
+    elif palette_type in ("spectra6", "6color"):
+        # 6-color (Black, White, Yellow, Red, Blue, Green) for Waveshare 7.3 (E)
+        quantized = image.quantize(palette=_PAL_IMG_SPECTRA6, dither=dither_flag)
         return quantized.convert("RGB")
 
     elif palette_type == "mono":

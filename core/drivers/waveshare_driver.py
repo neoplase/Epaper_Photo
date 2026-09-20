@@ -160,7 +160,7 @@ class WaveshareDisplayDriver(BaseDisplayDriver):
             try:
                 self.epd.sleep()
                 logger.info("[WaveshareDriver] Display in deep sleep mode.")
-                return True
             except Exception as e:
                 logger.warning(f"[WaveshareDriver] Could not enter sleep: {e}")
+        self.is_initialized = False  # Ensure next refresh calls init() to wake and reset panel
         return True

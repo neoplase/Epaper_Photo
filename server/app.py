@@ -211,6 +211,16 @@ def api_display_photo(filename):
     success = slideshow_daemon._display_single_photo(filename)
     return jsonify({"success": success, "current_photo": filename})
 
+@app.route("/api/clear", methods=["POST"])
+def api_clear_screen():
+    config = get_config()
+    screen_id = config.get("active_screen", "inky_impression_7_3")
+    driver = get_driver(screen_id)
+    success = driver.clear()
+    if config.get("deep_sleep_enabled", True):
+        driver.sleep()
+    return jsonify({"success": success})
+
 @app.route("/api/photo/<filename>", methods=["DELETE"])
 def api_delete_photo(filename):
     photo_path = os.path.join(PHOTOS_DIR, filename)

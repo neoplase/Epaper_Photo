@@ -29,6 +29,24 @@ const EInkPalettes = {
         [255, 220, 0]      // Yellow
     ],
 
+    // 4-Color (Black, White, Yellow, Red) for Waveshare 7.3 (G)
+    "4color": [
+        [0, 0, 0],         // Black
+        [255, 255, 255],   // White
+        [255, 255, 0],     // Yellow
+        [255, 0, 0]        // Red
+    ],
+
+    // Spectra 6 (Black, White, Yellow, Red, Blue, Green) for Waveshare 7.3 (E)
+    "spectra6": [
+        [0, 0, 0],         // Black
+        [255, 255, 255],   // White
+        [255, 255, 0],     // Yellow
+        [255, 0, 0],       // Red
+        [0, 0, 255],       // Blue
+        [0, 255, 0]        // Green
+    ],
+
     // 1-Bit Monochrome
     "mono": [
         [0, 0, 0],         // Black
