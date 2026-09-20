@@ -111,7 +111,7 @@ Raspberry Pi 40-Pin Header
 
 2. Clone this repository:
    ```bash
-   git clone https://github.com/<your-username>/Epaper_Photo.git
+   git clone https://github.com/neoplase/Epaper_Photo.git
    cd Epaper_Photo
    ```
 
