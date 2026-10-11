@@ -35,18 +35,29 @@ class InkyDisplayDriver(BaseDisplayDriver):
                 if "impression_7_3" in self.screen_id or "7_3" in self.screen_id:
                     from inky.inky_ac073tc1a import Inky as Inky73
                     self.device = Inky73()
+                    self.width, self.height = self.device.resolution
                     self.is_initialized = True
+                    logger.info(f"[InkyDriver] Initialized Inky 7.3\" via inky_ac073tc1a ({self.width}x{self.height})")
+                    return True
+                elif "impression_5_7" in self.screen_id or "impression_4_0" in self.screen_id:
+                    from inky.inky_uc8159 import Inky as InkyUC8159
+                    self.device = InkyUC8159()
+                    self.width, self.height = self.device.resolution
+                    self.is_initialized = True
+                    logger.info(f"[InkyDriver] Initialized Inky UC8159 ({self.width}x{self.height})")
                     return True
                 elif "what" in self.screen_id:
                     from inky.inky_what import InkyWHAT
                     color = "red" if "bwr" in self.palette_type else ("yellow" if "bwy" in self.palette_type else "black")
                     self.device = InkyWHAT(color)
+                    self.width, self.height = self.device.resolution
                     self.is_initialized = True
                     return True
                 elif "phat" in self.screen_id:
                     from inky.inky_phat import InkyPHAT
                     color = "red" if "bwr" in self.palette_type else ("yellow" if "bwy" in self.palette_type else "black")
                     self.device = InkyPHAT(color)
+                    self.width, self.height = self.device.resolution
                     self.is_initialized = True
                     return True
                 else:
@@ -54,6 +65,8 @@ class InkyDisplayDriver(BaseDisplayDriver):
                     return False
             except Exception as ex:
                 logger.error(f"[InkyDriver] Inky hardware fallback failed: {ex}")
+                if "claim" in str(ex).lower() or "pins" in str(ex).lower():
+                    logger.error("[InkyDriver] SPI Pin conflict detected. Add 'dtoverlay=spi0-0cs' to /boot/firmware/config.txt and reboot.")
                 return False
 
     def display(self, image: Image.Image) -> bool:

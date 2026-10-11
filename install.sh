@@ -28,6 +28,18 @@ if command -v raspi-config >/dev/null 2>&1; then
     raspi-config nonint do_spi 0
     raspi-config nonint do_i2c 0
     echo "[+] SPI and I2C enabled successfully."
+
+    # Prevent SPI CS0 pin locking on Raspberry Pi OS Bookworm for Pimoroni Inky
+    CFG_FILE=""
+    if [ -f "/boot/firmware/config.txt" ]; then
+        CFG_FILE="/boot/firmware/config.txt"
+    elif [ -f "/boot/config.txt" ]; then
+        CFG_FILE="/boot/config.txt"
+    fi
+    if [ -n "$CFG_FILE" ] && ! grep -q "dtoverlay=spi0-0cs" "$CFG_FILE"; then
+        echo "dtoverlay=spi0-0cs" >> "$CFG_FILE"
+        echo "[+] Added 'dtoverlay=spi0-0cs' to $CFG_FILE for Inky SPI pin compatibility."
+    fi
 else
     echo "[!] raspi-config not found. Please ensure SPI and I2C are enabled in /boot/config.txt"
 fi
@@ -62,6 +74,12 @@ sudo -u "$CURRENT_USER" pip3 install -r requirements.txt 2>/dev/null || true
 echo "[*] Installing Pimoroni Inky library..."
 sudo -u "$CURRENT_USER" pip3 install inky --break-system-packages 2>/dev/null || \
 sudo -u "$CURRENT_USER" pip3 install inky || true
+
+if python3 -c "import inky" >/dev/null 2>&1; then
+    echo "[+] Pimoroni Inky library installed and verified."
+else
+    echo "[!] Warning: 'inky' library could not be imported yet. Run 'python3 test_screen.py --info' to diagnose."
+fi
 
 # 5. Waveshare E-Paper library
 echo "[*] Waveshare E-Paper drivers bundled and ready."
