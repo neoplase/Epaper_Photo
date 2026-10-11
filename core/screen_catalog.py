@@ -48,7 +48,7 @@ SCREEN_CATALOG: Dict[str, Dict[str, Any]] = {
     "inky_impression_7_3": {
         "id": "inky_impression_7_3",
         "brand": "Pimoroni",
-        "model_name": "Inky Impression 7.3\" (7-Color)",
+        "model_name": "Inky Impression 7.3\" ACeP (7-Color)",
         "width": 800,
         "height": 480,
         "palette_type": "7color",
@@ -56,7 +56,20 @@ SCREEN_CATALOG: Dict[str, Dict[str, Any]] = {
         "driver_type": "inky",
         "driver_module": "inky_7_3",
         "size_category": "large",
-        "notes": "Pimoroni 7.3\" 7-colour e-paper HAT with I2C EEPROM and SPI interface."
+        "notes": "Pimoroni 7.3\" 7-colour e-paper HAT (ACeP gallery palette) with I2C EEPROM and SPI."
+    },
+    "inky_impression_7_3_spectra6": {
+        "id": "inky_impression_7_3_spectra6",
+        "brand": "Pimoroni",
+        "model_name": "Inky Impression 7.3\" Spectra 6 (2025 Edition)",
+        "width": 800,
+        "height": 480,
+        "palette_type": "spectra6",
+        "colors_desc": "Spectra 6 (Black, White, Yellow, Red, Blue, Green)",
+        "driver_type": "inky",
+        "driver_module": "inky_7_3",
+        "size_category": "large",
+        "notes": "Pimoroni 7.3\" Spectra 6 (PIM773) with high-saturation pigments and fast refresh."
     },
     "inky_impression_5_7": {
         "id": "inky_impression_5_7",
@@ -74,7 +87,7 @@ SCREEN_CATALOG: Dict[str, Dict[str, Any]] = {
     "inky_impression_4_0": {
         "id": "inky_impression_4_0",
         "brand": "Pimoroni",
-        "model_name": "Inky Impression 4.0\" (7-Color)",
+        "model_name": "Inky Impression 4.0\" ACeP (7-Color)",
         "width": 640,
         "height": 400,
         "palette_type": "7color",
@@ -82,7 +95,33 @@ SCREEN_CATALOG: Dict[str, Dict[str, Any]] = {
         "driver_type": "inky",
         "driver_module": "inky_4_0",
         "size_category": "medium",
-        "notes": "Pimoroni 4.0\" 7-colour e-paper display HAT."
+        "notes": "Pimoroni 4.0\" 7-colour e-paper display HAT (ACeP)."
+    },
+    "inky_impression_4_0_spectra6": {
+        "id": "inky_impression_4_0_spectra6",
+        "brand": "Pimoroni",
+        "model_name": "Inky Impression 4.0\" Spectra 6 (2025 Edition)",
+        "width": 640,
+        "height": 400,
+        "palette_type": "spectra6",
+        "colors_desc": "Spectra 6 (Black, White, Yellow, Red, Blue, Green)",
+        "driver_type": "inky",
+        "driver_module": "inky_4_0",
+        "size_category": "medium",
+        "notes": "Pimoroni 4.0\" Spectra 6 (PIM789) compact color e-paper HAT."
+    },
+    "inky_impression_13_3_spectra6": {
+        "id": "inky_impression_13_3_spectra6",
+        "brand": "Pimoroni",
+        "model_name": "Inky Impression 13.3\" Spectra 6 (Large Format)",
+        "width": 1600,
+        "height": 1200,
+        "palette_type": "spectra6",
+        "colors_desc": "Spectra 6 (Black, White, Yellow, Red, Blue, Green)",
+        "driver_type": "inky",
+        "driver_module": "inky_13_3",
+        "size_category": "large",
+        "notes": "Pimoroni 13.3\" A4-size ultra-high resolution Spectra 6 color display."
     },
     "inky_what_bwr": {
         "id": "inky_what_bwr",
